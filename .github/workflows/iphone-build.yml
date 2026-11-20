@@ -1,1 +1,39 @@
 
+name: Pokemon Smaragd fuer iPhone
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Projekt laden
+        uses: actions/checkout@v4
+
+      - name: Werkzeuge installieren
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential binutils-arm-none-eabi libpng-dev git
+
+      - name: Compiler installieren
+        run: |
+          git clone --depth 1 https://github.com/pret/agbcc.git agbcc
+          cd agbcc
+          ./build.sh
+          ./install.sh "$GITHUB_WORKSPACE"
+
+      - name: Pokemon Smaragd kompilieren
+        run: make -j2
+
+      - name: ROM bereitstellen
+        uses: actions/upload-artifact@v4
+        with:
+          name: pokeemerald-iphone
+          path: pokeemerald.gba
+          if-no-files-found: error
+          retention-days: 1
